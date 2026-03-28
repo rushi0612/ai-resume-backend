@@ -1,0 +1,32 @@
+const { pool } = require('../config/db');
+
+const registerUser = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    // 1. Check if user already exists
+    const userCheck = await pool.query(
+      'SELECT * FROM users WHERE email = $1',
+      [email]
+    );
+
+    if (userCheck.rows.length > 0) {
+      return res.status(400).json({ error: 'User already exists' });
+    }
+
+    // 2. Insert new user
+    await pool.query(
+      'INSERT INTO users (name, email, password) VALUES ($1, $2, $3)',
+      [name, email, password]
+    );
+
+    // 3. Response
+    res.status(201).json({ message: 'User registered successfully' });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+module.exports = { registerUser };
