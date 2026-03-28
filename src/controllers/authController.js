@@ -1,4 +1,5 @@
 const { pool } = require('../config/db');
+const bcrypt = require('bcrypt');
 
 const registerUser = async (req, res) => {
   try {
@@ -13,11 +14,14 @@ const registerUser = async (req, res) => {
     if (userCheck.rows.length > 0) {
       return res.status(400).json({ error: 'User already exists' });
     }
-
+    // Hash password 
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    
     // 2. Insert new user
     await pool.query(
       'INSERT INTO users (name, email, password) VALUES ($1, $2, $3)',
-      [name, email, password]
+      [name, email, hashedPassword]
     );
 
     // 3. Response
