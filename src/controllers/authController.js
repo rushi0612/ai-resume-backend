@@ -77,4 +77,23 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser };
+const uploadResume = async (req, res) => {
+  try {
+    const filePath = req.file.path;
+    const userId = req.user.id;
+
+    // save file path in DB
+    await pool.query(
+      'UPDATE users SET resume = $1 WHERE id = $2',
+      [filePath, userId]
+    );
+
+    res.json({ message: 'Resume uploaded successfully', filePath });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Upload failed' });
+  }
+};
+
+module.exports = { registerUser, loginUser, uploadResume };
